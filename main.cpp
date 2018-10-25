@@ -9,8 +9,8 @@ using namespace std;
 int stoi(string l){
 	int num = 0;
 
-	for(int i = 0 ; i < l.length(); i++)
-		num +=  (l[i]-48) * pow(10, (l.length() - 1 - i));
+	for(int i = 0 ; i < l.length()-1; i++)
+		num +=  (l[i]-0x30) * pow(10, (l.length() - 2 - i));
 
 	return num;
 }
@@ -18,14 +18,14 @@ int stoi(string l){
 //Funcao que calcula o offset
 int calc_offset(int n){
 	int offset;
-	offset = n % 16;
+	offset = n & 0x00FF;
 	return offset;
 }
 
 //Funcao que calcula o numero de pagina
 int calc_pgnumber(int n){
 	int pgnumber;
-	pgnumber = n/16;
+	pgnumber = (n & 0xFF00)>>8;
 	return pgnumber;
 }
 
@@ -60,8 +60,8 @@ int main(int argc, char *argv[]){
 			//Transforma para numero
 			num = stoi(line);
 
-			//Num_efetivo eh LSB do numero de entrada
-			num_efetivo = num % 256;
+			//Num_efetivo eh LSW do numero de entrada
+			num_efetivo = num & 0x0000FFFF;
 
 			//Calcula o deslocamento e o numero de pagina
 			offset = calc_offset(num_efetivo);
