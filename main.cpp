@@ -3,31 +3,46 @@
 #include <string>
 #include <math.h>
 
+#define TBL_SIZE 16
+#define PAGETABLE_SIZE 256
+#define MEMORY_SIZE 256
+
 using namespace std;
 
-
-int my_stoi(string);					//Transforma string para numero
-int calc_offset(int);   			//Calcula o offset
-int calc_pgnumber(int); 			//Calcula o numero de pagina
-void print_header(void);			//Printa o titulo da tabela
-void print_line(int,int,int,int);	//Printa as linhas da tabela
-
-struct TLB {
-	int page_number;
-	int frame_number;
+struct TLB{
+	int tlb_page_number;
+	int tlb_frame_number;
 };
 
-struct PageTable
-{
-	int present_bit;
-	int frame_number;
+struct PageTable{
+	int pt_present_bit;
+	int pt_frame_number;
 };
+
+int my_stoi(string);				 //Transforma string para numero
+int calc_offset(int);   			 //Calcula o offset
+int calc_pgnumber(int); 			 //Calcula o numero de pagina
+void print_header(void);			 //Printa o titulo da tabela
+void print_line(int,int,int,int,int);//Printa as linhas da tabela
+
+void print_tlb(TLB t[]);			 //Printa a TLB
+void print_pagetable(PageTable t[]); //Printa a tabela de paginas
+void clean_tlb(TLB t[]);			 //Limpa a TLB
+void clean_pagetable(PageTable t[]); //Limpa a tabela de paginas
+
+int check_pagetable(PageTable t[], int);//Procura por um elemento
 
 int main(int argc, char *argv[]){
 
-	string line;
-	int num, num_efetivo, offset, pgnumber;
-	fstream entrada;
+	string line, memo[MEMORY_SIZE];
+	int num, num_efetivo, offset, pgnumber, map, caractere;
+	fstream entrada, backstore;
+
+	PageTable *pagetable = new PageTable[PAGETABLE_SIZE];
+	TLB *tlb = new TLB[TBL_SIZE];
+
+	clean_pagetable(pagetable);
+	clean_tlb(tlb);
 
 	//Abrir o arquivo que o usuario pede
 	//Caso nao seja pedido nada sera aberto 'enderecos.txt'
@@ -36,13 +51,15 @@ int main(int argc, char *argv[]){
 	else
 		entrada.open("enderecos.txt");
 
+	backstore.open("BACKSTORE.bin");
+
 	//Testar se o arquivo ta aberto
-	if (entrada.is_open()){
-		cout << "Arquivo aberto com sucesso!\n" << endl;
+	if (entrada.is_open() && backstore.is_open()){
+		cout << "Arquivos abertos com sucesso!\n" << endl;
 
 		print_header();
 
-		//Ler a linha do arquivo
+		//Ler a linha do arquivo de entrada
 		while(getline(entrada, line)){
 			//Transforma para numero
 			num = my_stoi(line);
@@ -52,21 +69,36 @@ int main(int argc, char *argv[]){
 			offset = calc_offset(num_efetivo);
 			pgnumber = calc_pgnumber(num_efetivo);
 
-			print_line(num, num_efetivo, pgnumber, offset);
-	}
+			//Ve se a pagina tem um quadro
+			map = check_pagetable(pagetable, pgnumber);
+
+			if(map == -1){	
+				//Pagina nao mapeada em memoria
+				//Sera necessario alocar um quadro
+			}
+			else{			
+				//Pagina mapeada na memoria
+			}
+
+			print_line(num, num_efetivo, pgnumber, offset, caractere);
+		}
+
+		print_tlb(tlb);
+		print_pagetable(pagetable);
 
 		//Fechar o arquivo
 		entrada.close();
+		backstore.close();
 	}
 	else{
-		cerr << "Erro na abertura do arquivo" << endl;
-		cout << "Tente renomear o arquivo para 'enderecos.txt'" << endl;
+		cerr << "Erro na abertura de arquivo" << endl;
+		cout << "Tente renomear o arquivo para 'enderecos.txt'\n" 
+			 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n" << endl;
 	}
 
 	return 0;
 }
 
-//Funcao que transforma string para numero
 int my_stoi(string l){
 	int num = 0;
 	for(int i = 0 ; i < l.length()-1; i++)
@@ -74,14 +106,12 @@ int my_stoi(string l){
 	return num;
 }
 
-//Funcao que calcula o offset
 int calc_offset(int n){
 	int offset;
 	offset = n & 0x00FF;
 	return offset;
 }
 
-//Funcao que calcula o numero de pagina
 int calc_pgnumber(int n){
 	int pgnumber;
 	pgnumber = (n & 0xFF00)>>8;
@@ -93,14 +123,56 @@ void print_header(void){
 	     << "ENT = entrada\n"
 	     << "LSW =  Word menos significante (pagenumber + offset)\n"
 	     << "PGNUM = Page number\n"
-	     << "OFF = Off set\n\n" << endl ;
+	     << "OFF = Off set\n" 
+	     << "CHAR = caractere na posicao\n\n"<< endl ;
 
-	cout << "ENT\tLSW\tPGNUM\tOFF\n" << endl;
+	cout << "ENT\tLSW\tPGNUM\tOFF\tCHAR\n" << endl;
 }
 
-void print_line(int info1, int info2, int info3, int info4){
+void print_line(int info1, int info2, int info3, int info4, int info5){
 	cout << info1 << "\t"
 	     << info2 << "\t"
 	     << info3 << "\t"
-	     << info4 << "\t" << endl;
+	     << info4 << "\t"
+		 << info4 << "\t" << endl;
+}
+
+void print_tlb(TLB t[]){
+	cout << "\n\nTLB:" << endl
+		 << endl << "\tPN" << "\tFN\n" << endl;
+
+	for(int i = 0; i < TBL_SIZE; i++)
+		cout << i << "\t"
+			 << t[i].tlb_page_number << "\t"
+		 	 << t[i].tlb_frame_number << endl;
+}
+
+void print_pagetable(PageTable t[]){
+	cout << "\n\nTabela de paginas: " << endl
+		 << endl << "\tFN" << "\tPB\n" << endl;
+
+	for(int i = 0; i < PAGETABLE_SIZE; i++)
+		cout << i << "\t"
+			 << t[i].pt_frame_number << "\t"
+			 << t[i].pt_present_bit << endl;
+}
+
+void clean_tlb(TLB t[]){
+	for(int i = 0; i < TBL_SIZE; i++){
+		t[i].tlb_page_number = -1;
+		t[i].tlb_frame_number = -1;
+	}
+}
+
+void clean_pagetable(PageTable t[]){
+	for(int i = 0; i < PAGETABLE_SIZE; i++){
+		t[i].pt_frame_number = -1;
+		t[i].pt_present_bit = -1;
+	}
+}
+
+int check_pagetable(PageTable t[], int page){
+	int convert;
+	convert = t[page].pt_frame_number;
+	return convert;
 }
