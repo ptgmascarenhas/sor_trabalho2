@@ -6,11 +6,18 @@
 using namespace std;
 
 
-int stoi(string);					//Transforma string para numero
+int my_stoi(string);					//Transforma string para numero
 int calc_offset(int);   			//Calcula o offset
 int calc_pgnumber(int); 			//Calcula o numero de pagina
 void print_header(void);			//Printa o titulo da tabela
 void print_line(int,int,int,int);	//Printa as linhas da tabela
+
+struct TLB {
+	int pagenumber;
+	int framenumber;
+};
+
+int page_table[256];
 
 int main(int argc, char *argv[]){
 
@@ -34,7 +41,7 @@ int main(int argc, char *argv[]){
 		//Ler a linha do arquivo
 		while(getline(entrada, line)){
 			//Transforma para numero
-			num = stoi(line);
+			num = my_stoi(line);
 			//Num_efetivo eh LSW do numero de entrada
 			num_efetivo = num & 0x0000FFFF;
 			//Calcula o deslocamento e o numero de pagina
@@ -56,7 +63,7 @@ int main(int argc, char *argv[]){
 }
 
 //Funcao que transforma string para numero
-int stoi(string l){
+int my_stoi(string l){
 	int num = 0;
 	for(int i = 0 ; i < l.length()-1; i++)
 		num +=  (l[i]-0x30) * pow(10, (l.length() - 2 - i));
