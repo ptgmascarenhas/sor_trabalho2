@@ -5,29 +5,12 @@
 
 using namespace std;
 
-//Funcao que transforma string para numero
-int stoi(string l){
-	int num = 0;
 
-	for(int i = 0 ; i < l.length()-1; i++)
-		num +=  (l[i]-0x30) * pow(10, (l.length() - 2 - i));
-
-	return num;
-}
-
-//Funcao que calcula o offset
-int calc_offset(int n){
-	int offset;
-	offset = n & 0x00FF;
-	return offset;
-}
-
-//Funcao que calcula o numero de pagina
-int calc_pgnumber(int n){
-	int pgnumber;
-	pgnumber = (n & 0xFF00)>>8;
-	return pgnumber;
-}
+int stoi(string);					//Transforma string para numero
+int calc_offset(int);   			//Calcula o offset
+int calc_pgnumber(int); 			//Calcula o numero de pagina
+void print_header(void);			//Printa o titulo da tabela
+void print_line(int,int,int,int);	//Printa as linhas da tabela
 
 int main(int argc, char *argv[]){
 
@@ -46,32 +29,19 @@ int main(int argc, char *argv[]){
 	if (entrada.is_open()){
 		cout << "Arquivo aberto com sucesso!\n" << endl;
 
-		//Printa o header da tabela
-		cout << "Tabela de entradas:\n"
-		     << "ENT = entrada\n"
-		     << "LSW =  Word menos significante (pagenumber + offset)\n"
-		     << "PGNUM = Page number\n"
-		     << "OFF = Off set\n\n" << endl ;
-
-		cout << "ENT\tLSW\tPGNUM\tOFF\n" << endl;
+		print_header();
 
 		//Ler a linha do arquivo
 		while(getline(entrada, line)){
 			//Transforma para numero
 			num = stoi(line);
-
 			//Num_efetivo eh LSW do numero de entrada
 			num_efetivo = num & 0x0000FFFF;
-
 			//Calcula o deslocamento e o numero de pagina
 			offset = calc_offset(num_efetivo);
 			pgnumber = calc_pgnumber(num_efetivo);
 
-			//printar pagina e deslocamento
-			cout << num << "\t"
-			     << num_efetivo << "\t"
-			     << pgnumber << "\t"
-			     << offset << "\t" << endl;
+			print_line(num, num_efetivo, pgnumber, offset);
 	}
 
 		//Fechar o arquivo
@@ -83,4 +53,43 @@ int main(int argc, char *argv[]){
 	}
 
 	return 0;
+}
+
+//Funcao que transforma string para numero
+int stoi(string l){
+	int num = 0;
+	for(int i = 0 ; i < l.length()-1; i++)
+		num +=  (l[i]-0x30) * pow(10, (l.length() - 2 - i));
+	return num;
+}
+
+//Funcao que calcula o offset
+int calc_offset(int n){
+	int offset;
+	offset = n & 0x00FF;
+	return offset;
+}
+
+//Funcao que calcula o numero de pagina
+int calc_pgnumber(int n){
+	int pgnumber;
+	pgnumber = (n & 0xFF00)>>8;
+	return pgnumber;
+}
+
+void print_header(void){
+	cout << "Tabela de entradas:\n"
+	     << "ENT = entrada\n"
+	     << "LSW =  Word menos significante (pagenumber + offset)\n"
+	     << "PGNUM = Page number\n"
+	     << "OFF = Off set\n\n" << endl ;
+
+	cout << "ENT\tLSW\tPGNUM\tOFF\n" << endl;
+}
+
+void print_line(int info1, int info2, int info3, int info4){
+	cout << info1 << "\t"
+	     << info2 << "\t"
+	     << info3 << "\t"
+	     << info4 << "\t" << endl;
 }
