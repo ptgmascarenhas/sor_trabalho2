@@ -13,11 +13,15 @@ void print_header(void);			//Printa o titulo da tabela
 void print_line(int,int,int,int);	//Printa as linhas da tabela
 
 struct TLB {
-	int pagenumber;
-	int framenumber;
+	int page_number;
+	int frame_number;
 };
 
-int page_table[256];
+struct PageTable
+{
+	int present_bit;
+	int frame_number;
+};
 
 int main(int argc, char *argv[]){
 
