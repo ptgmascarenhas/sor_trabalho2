@@ -2,6 +2,10 @@
 
 Segundo trabalho de Sistemas Operacionais de Redes
 
+Antes de compilar:
+- Crie um arquivo chamado memory.txt
+- Verifique se o diretorio contem BACKSTORE.bin 
+
 Para compilar e rodar use:
 
 g++ -o executavel main.cpp

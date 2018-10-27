@@ -26,21 +26,21 @@ void print_header(void);			 	 //Printa o titulo da tabela
 void print_line(int,int,int,int,int);	 //Printa as linhas da tabela
 void print_estatisticas(int,int,int,int);//Printa as estatisticas 
 
-void print_tlb(TLB t[]);			 //Printa a TLB
-void print_pagetable(PageTable t[]); //Printa a tabela de paginas
-void clean_tlb(TLB t[]);			 //Limpa a TLB
-void clean_pagetable(PageTable t[]); //Limpa a tabela de paginas
+void print_tlb(TLB t[]);			 	 //Printa a TLB
+void print_pagetable(PageTable t[]); 	 //Printa a tabela de paginas
+void clean_tlb(TLB t[]);			 	 //Limpa a TLB
+void clean_pagetable(PageTable t[]); 	 //Limpa a tabela de paginas
 
 int check_pagetable(PageTable t[], int);  //Procura por um elemento
 void set_pagetable(PageTable t[],int,int); //Preenche um registro na pt
 
 int main(int argc, char *argv[]){
 
-	string line, memo[MEMORY_SIZE];
-	char memo_buffer[MEMORY_SIZE];
-	int num, num_efetivo, offset, pgnumber, map, caractere, atual = 0;
+	string line;
+	char memo_buffer[MEMORY_SIZE], caractere[1];
+	int num, num_efetivo, offset, pgnumber, map, atual = 0;
 	int numentradas = 0, faltasdepagina = 0, acertostlb = 0, acertospt = 0;
-	fstream entrada, backstore;
+	fstream entrada, backstore, memory;
 
 	PageTable *pagetable = new PageTable[PAGETABLE_SIZE];
 	TLB *tlb = new TLB[TBL_SIZE];
@@ -56,9 +56,10 @@ int main(int argc, char *argv[]){
 		entrada.open("enderecos.txt");
 
 	backstore.open("BACKSTORE.bin");
+	memory.open("memory.txt", ios::app);
 
 	//Testar se o arquivo ta aberto
-	if (entrada.is_open() && backstore.is_open()){
+	if (entrada.is_open() && backstore.is_open() && memory.is_open()){
 		cout << "Arquivos abertos com sucesso!\n" << endl;
 
 		print_header();
@@ -76,37 +77,33 @@ int main(int argc, char *argv[]){
 			//Ve se a pagina tem um quadro
 			map = check_pagetable(pagetable, pgnumber);
 
-			/*
-			Por enquando a memoria sera o proprio BACKSTORE.bin
-			pq quando coloquei uma estrutura de dados nela estourou
-			o espaco de endercamento do meu programa kkk
-
-			Entao ao inves so programa procurar na memoria ele
-			sempre procura no backstore mas sabe diferenciar quantas
-			vezes deu falta de pagina
-			*/
-
-			backstore.seekg(pgnumber*256, ios::beg);
-			backstore.read(memo_buffer, 256);
-
 			if(map == -1){	
 				//Pagina nao mapeada em memoria
 				//Sera necessario alocar um quadro
+				backstore.seekg(pgnumber*256, ios::beg);
+				backstore.read(memo_buffer, 256);
 
-				//Salva na memoria a pagina
-				//E anda pra proxima posição da memoria
+				//Coloca a pagina na memoria
+				memory << memo_buffer;
+
+				//Atualiza a Page Table e pega o caractere
 				set_pagetable(pagetable, pgnumber, atual);
-				caractere = memo_buffer[offset];
+				caractere[0] = memo_buffer[offset];
+
+				//Atualiza estatisticas
 				atual++;
 				faltasdepagina++;
 			}
 			else{
-				//Pagina mapeada na memoria
-				caractere = memo_buffer[offset];
+				//Pega pagia da memoriae o caractere
+				memory.seekg(map*256+offset, ios::beg);
+				memory.read(caractere, 1);
+
+				//Atualiza estatisticas
 				acertospt++;
 			}
 
-			print_line(num, num_efetivo, pgnumber, offset, caractere);
+			print_line(num, num_efetivo, pgnumber, offset, caractere[0]);
 			numentradas++;
 		}
 
@@ -117,11 +114,13 @@ int main(int argc, char *argv[]){
 		//Fechar o arquivo
 		entrada.close();
 		backstore.close();
+		memory.close();
 	}
 	else{
-		cerr << "Erro na abertura de arquivo" << endl;
-		cout << "Tente renomear o arquivo para 'enderecos.txt'\n" 
-			 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n" << endl;
+		cerr << "Erro na abertura de arquivo" << endl << endl;
+		cout << "Tente renomear o arquivo de entrada para 'enderecos.txt'\n" 
+			 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n" 
+			 << "Verifique se existe um 'memory.txt' no diretório\n" << endl;
 	}
 
 	return 0;
