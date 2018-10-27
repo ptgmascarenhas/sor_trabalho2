@@ -30,12 +30,14 @@ void print_pagetable(PageTable t[]); //Printa a tabela de paginas
 void clean_tlb(TLB t[]);			 //Limpa a TLB
 void clean_pagetable(PageTable t[]); //Limpa a tabela de paginas
 
-int check_pagetable(PageTable t[], int);//Procura por um elemento
+int check_pagetable(PageTable t[], int);  //Procura por um elemento
+void set_pagetable(PageTable t[],int,int); //Preenche um registro na pt
 
 int main(int argc, char *argv[]){
 
 	string line, memo[MEMORY_SIZE];
-	int num, num_efetivo, offset, pgnumber, map, caractere;
+	char memo_buffer[MEMORY_SIZE];
+	int num, num_efetivo, offset, pgnumber, map, caractere, atual = 0;
 	fstream entrada, backstore;
 
 	PageTable *pagetable = new PageTable[PAGETABLE_SIZE];
@@ -72,12 +74,32 @@ int main(int argc, char *argv[]){
 			//Ve se a pagina tem um quadro
 			map = check_pagetable(pagetable, pgnumber);
 
+			/*
+			Por enquando a memoria sera o proprio BACKSTORE.bin
+			pq quando coloquei uma estrutura de dados nela estourou
+			o espaco de endercamento do meu programa kkk
+
+			Entao ao inves so programa procurar na memoria ele
+			sempre procura no backstore mas sabe diferenciar quantas
+			vezes deu falta de pagina
+			*/
+
+			backstore.seekg(pgnumber*256, ios::beg);
+			backstore.read(memo_buffer, 256);
+
 			if(map == -1){	
 				//Pagina nao mapeada em memoria
 				//Sera necessario alocar um quadro
+
+				//Salva na memoria a pagina
+				//E anda pra proxima posição da memoria
+				set_pagetable(pagetable, pgnumber, atual);
+				caractere = memo_buffer[offset];
+				atual++;
 			}
-			else{			
+			else{
 				//Pagina mapeada na memoria
+				caractere = memo_buffer[offset];
 			}
 
 			print_line(num, num_efetivo, pgnumber, offset, caractere);
@@ -134,7 +156,7 @@ void print_line(int info1, int info2, int info3, int info4, int info5){
 	     << info2 << "\t"
 	     << info3 << "\t"
 	     << info4 << "\t"
-		 << info4 << "\t" << endl;
+		 << info5 << "\t" << endl;
 }
 
 void print_tlb(TLB t[]){
@@ -171,8 +193,13 @@ void clean_pagetable(PageTable t[]){
 	}
 }
 
-int check_pagetable(PageTable t[], int page){
+int check_pagetable(PageTable t[], int pg){
 	int convert;
-	convert = t[page].pt_frame_number;
+	convert = t[pg].pt_frame_number;
 	return convert;
+}
+
+void set_pagetable(PageTable t[], int pg, int fr){
+	t[pg].pt_frame_number = fr;
+	t[pg].pt_present_bit = 1;
 }
