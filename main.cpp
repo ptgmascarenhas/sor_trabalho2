@@ -19,11 +19,12 @@ struct PageTable{
 	int pt_frame_number;
 };
 
-int my_stoi(string);				 //Transforma string para numero
-int calc_offset(int);   			 //Calcula o offset
-int calc_pgnumber(int); 			 //Calcula o numero de pagina
-void print_header(void);			 //Printa o titulo da tabela
-void print_line(int,int,int,int,int);//Printa as linhas da tabela
+int my_stoi(string);				 	 //Transforma string para numero
+int calc_offset(int);   			 	 //Calcula o offset
+int calc_pgnumber(int); 			 	 //Calcula o numero de pagina
+void print_header(void);			 	 //Printa o titulo da tabela
+void print_line(int,int,int,int,int);	 //Printa as linhas da tabela
+void print_estatisticas(int,int,int,int);//Printa as estatisticas 
 
 void print_tlb(TLB t[]);			 //Printa a TLB
 void print_pagetable(PageTable t[]); //Printa a tabela de paginas
@@ -38,6 +39,7 @@ int main(int argc, char *argv[]){
 	string line, memo[MEMORY_SIZE];
 	char memo_buffer[MEMORY_SIZE];
 	int num, num_efetivo, offset, pgnumber, map, caractere, atual = 0;
+	int numentradas = 0, faltasdepagina = 0, acertostlb = 0, acertospt = 0;
 	fstream entrada, backstore;
 
 	PageTable *pagetable = new PageTable[PAGETABLE_SIZE];
@@ -96,17 +98,21 @@ int main(int argc, char *argv[]){
 				set_pagetable(pagetable, pgnumber, atual);
 				caractere = memo_buffer[offset];
 				atual++;
+				faltasdepagina++;
 			}
 			else{
 				//Pagina mapeada na memoria
 				caractere = memo_buffer[offset];
+				acertospt++;
 			}
 
 			print_line(num, num_efetivo, pgnumber, offset, caractere);
+			numentradas++;
 		}
 
 		print_tlb(tlb);
 		print_pagetable(pagetable);
+		print_estatisticas(numentradas,faltasdepagina,acertostlb,acertospt);
 
 		//Fechar o arquivo
 		entrada.close();
@@ -177,6 +183,13 @@ void print_pagetable(PageTable t[]){
 		cout << i << "\t"
 			 << t[i].pt_frame_number << "\t"
 			 << t[i].pt_present_bit << endl;
+}
+
+void print_estatisticas(int info1, int info2, int info3, int info4){
+	cout << "\n\nNumero de entradas: " << info1
+	     << "\nNumero de faltas de pagina: " << info2 << "\t"
+	     << "\nQuantidade de acertos na TLB: " << info3 << "\t"
+	     << "\nQuantidade de acertos na Tabela de Paginas: " << info4 << "\t" << endl;
 }
 
 void clean_tlb(TLB t[]){
