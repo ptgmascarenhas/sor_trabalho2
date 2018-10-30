@@ -3,12 +3,17 @@
 #include <string>
 #include <math.h>
 
+<<<<<<< HEAD
 #define TLB_SIZE 16
+=======
+#define TBL_SIZE 16
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 #define PAGETABLE_SIZE 256
 #define MEMORY_SIZE 256
 
 using namespace std;
 
+<<<<<<< HEAD
 struct TLB {
 	int tlb_page_number;
 	int tlb_frame_number;
@@ -16,6 +21,14 @@ struct TLB {
 };
 
 struct PageTable {
+=======
+struct TLB{
+	int tlb_page_number;
+	int tlb_frame_number;
+};
+
+struct PageTable{
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 	int pt_present_bit;
 	int pt_frame_number;
 };
@@ -24,17 +37,25 @@ int my_stoi(string);				 	 //Transforma string para numero
 int calc_offset(int);   			 	 //Calcula o offset
 int calc_pgnumber(int); 			 	 //Calcula o numero de pagina
 void print_header(void);			 	 //Printa o titulo da tabela
+<<<<<<< HEAD
 void print_line(int,int,int,int,char);	 //Printa as linhas da tabela
 void print_estatisticas(int,int,int,int);//Printa as estatisticas
+=======
+void print_line(int,int,int,int,int);	 //Printa as linhas da tabela
+void print_estatisticas(int,int,int,int);//Printa as estatisticas 
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 
 void print_tlb(TLB t[]);			 	 //Printa a TLB
 void print_pagetable(PageTable t[]); 	 //Printa a tabela de paginas
 void clean_tlb(TLB t[]);			 	 //Limpa a TLB
 void clean_pagetable(PageTable t[]); 	 //Limpa a tabela de paginas
 
+<<<<<<< HEAD
 int check_tlb(TLB t[], int);  //Procura por um elemento na TLB
 void set_tlb(TLB t[],int,int); //Preenche um registro na TLB
 
+=======
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 int check_pagetable(PageTable t[], int);  //Procura por um elemento
 void set_pagetable(PageTable t[],int,int); //Preenche um registro na pt
 
@@ -47,7 +68,11 @@ int main(int argc, char *argv[]){
 	fstream entrada, backstore, memory;
 
 	PageTable *pagetable = new PageTable[PAGETABLE_SIZE];
+<<<<<<< HEAD
 	TLB *tlb = new TLB[TLB_SIZE];
+=======
+	TLB *tlb = new TLB[TBL_SIZE];
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 
 	clean_pagetable(pagetable);
 	clean_tlb(tlb);
@@ -78,6 +103,7 @@ int main(int argc, char *argv[]){
 			offset = calc_offset(num_efetivo);
 			pgnumber = calc_pgnumber(num_efetivo);
 
+<<<<<<< HEAD
 			int tlb_hit = check_tlb(tlb, pgnumber);
 
 			// Se a pagina nao estiver no TLB
@@ -118,6 +144,36 @@ int main(int argc, char *argv[]){
 			//Pega pagina da memoria e o caractere
 			memory.seekg(pgnumber*256+offset, ios::beg);
 			memory.read(caractere, 1);
+=======
+			//Ve se a pagina tem um quadro
+			map = check_pagetable(pagetable, pgnumber);
+
+			if(map == -1){	
+				//Pagina nao mapeada em memoria
+				//Sera necessario alocar um quadro
+				backstore.seekg(pgnumber*256, ios::beg);
+				backstore.read(memo_buffer, 256);
+
+				//Coloca a pagina na memoria
+				memory << memo_buffer;
+
+				//Atualiza a Page Table e pega o caractere
+				set_pagetable(pagetable, pgnumber, atual);
+				caractere[0] = memo_buffer[offset];
+
+				//Atualiza estatisticas
+				atual++;
+				faltasdepagina++;
+			}
+			else{
+				//Pega pagia da memoriae o caractere
+				memory.seekg(map*256+offset, ios::beg);
+				memory.read(caractere, 1);
+
+				//Atualiza estatisticas
+				acertospt++;
+			}
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 
 			print_line(num, num_efetivo, pgnumber, offset, caractere[0]);
 			numentradas++;
@@ -134,8 +190,13 @@ int main(int argc, char *argv[]){
 	}
 	else{
 		cerr << "Erro na abertura de arquivo" << endl << endl;
+<<<<<<< HEAD
 		cout << "Tente renomear o arquivo de entrada para 'enderecos.txt'\n"
 			 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n"
+=======
+		cout << "Tente renomear o arquivo de entrada para 'enderecos.txt'\n" 
+			 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n" 
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 			 << "Verifique se existe um 'memory.txt' no diretório\n" << endl;
 	}
 
@@ -166,13 +227,21 @@ void print_header(void){
 	     << "ENT = entrada\n"
 	     << "LSW =  Word menos significante (pagenumber + offset)\n"
 	     << "PGNUM = Page number\n"
+<<<<<<< HEAD
 	     << "OFF = Off set\n"
+=======
+	     << "OFF = Off set\n" 
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 	     << "CHAR = caractere na posicao\n\n"<< endl ;
 
 	cout << "ENT\tLSW\tPGNUM\tOFF\tCHAR\n" << endl;
 }
 
+<<<<<<< HEAD
 void print_line(int info1, int info2, int info3, int info4, char info5){
+=======
+void print_line(int info1, int info2, int info3, int info4, int info5){
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 	cout << info1 << "\t"
 	     << info2 << "\t"
 	     << info3 << "\t"
@@ -184,7 +253,11 @@ void print_tlb(TLB t[]){
 	cout << "\n\nTLB:" << endl
 		 << endl << "\tPN" << "\tFN\n" << endl;
 
+<<<<<<< HEAD
 	for(int i = 0; i < TLB_SIZE; i++)
+=======
+	for(int i = 0; i < TBL_SIZE; i++)
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 		cout << i << "\t"
 			 << t[i].tlb_page_number << "\t"
 		 	 << t[i].tlb_frame_number << endl;
@@ -208,10 +281,16 @@ void print_estatisticas(int info1, int info2, int info3, int info4){
 }
 
 void clean_tlb(TLB t[]){
+<<<<<<< HEAD
 	for(int i = 0; i < TLB_SIZE; i++){
 		t[i].tlb_page_number = -1;
 		t[i].tlb_frame_number = -1;
 		t[i].tlb_time = 0;
+=======
+	for(int i = 0; i < TBL_SIZE; i++){
+		t[i].tlb_page_number = -1;
+		t[i].tlb_frame_number = -1;
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 	}
 }
 
@@ -222,6 +301,7 @@ void clean_pagetable(PageTable t[]){
 	}
 }
 
+<<<<<<< HEAD
 int check_tlb (TLB t[], int pg) { // Checa se a pagina em questao esta no TLB
 	for (int i = 0; i < TLB_SIZE; i++) {
 		if (t[i].tlb_page_number == pg) return 1;
@@ -255,6 +335,8 @@ void set_tlb (TLB t[], int pg, int fr) {
 		t[position].tlb_frame_number = fr;
 }
 
+=======
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
 int check_pagetable(PageTable t[], int pg){
 	int convert;
 	convert = t[pg].pt_frame_number;
@@ -264,4 +346,8 @@ int check_pagetable(PageTable t[], int pg){
 void set_pagetable(PageTable t[], int pg, int fr){
 	t[pg].pt_frame_number = fr;
 	t[pg].pt_present_bit = 1;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 6d74502e7d954740974941b036102c8ca52cf7dc
