@@ -13,3 +13,7 @@ g++ -o executavel main.cpp
 ./executavel arquivo_de_enderecos
 
 Caso nao seja declarado nenhum arquivo por padrao o programa procura por enderecos.txt
+
+
+APAGAR OS ARQUIVOS teste-* antes de enviar, neles tem o abc... para teste de print certo do offset  
+

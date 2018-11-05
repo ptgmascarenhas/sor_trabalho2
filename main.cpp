@@ -43,13 +43,12 @@ int  point_tlb = 0, point_memo = 0;
 int main(int argc, char *argv[]){
 
 	string line;
-	char memo_buffer[MEMORY_SIZE], caractere[1];
+	char memo_buffer[MEMORY_SIZE], caractere;
 	int num, num_efetivo, offset, pgnumber, map, tlb_hit, loc;
 	int numentradas = 0, faltasdepagina = 0, acertostlb = 0, acertospt = 0;
-	fstream entrada, backstore;// memory;
+	fstream entrada, backstore;
 
 	string *memory = new string[MEMORY_SIZE];
-
 	PageTable *pagetable = new PageTable[PAGETABLE_SIZE];
 	TLB *tlb = new TLB[TLB_SIZE];
 
@@ -64,10 +63,9 @@ int main(int argc, char *argv[]){
 		entrada.open("enderecos.txt");
 
 	backstore.open("BACKSTORE.bin");
-	//memory.open("memory.txt");
 
 	//Testar se o arquivo ta aberto
-	if (entrada.is_open() && backstore.is_open() /*&& memory.is_open()*/){
+	if (entrada.is_open() && backstore.is_open()){
 		cout << "Arquivos abertos com sucesso!\n" << endl;
 
 		print_header();
@@ -99,7 +97,6 @@ int main(int argc, char *argv[]){
 					backstore.read(memo_buffer, MEMORY_SIZE);
 
 					//Coloca a pagina na memoria
-					//memory << memo_buffer;
 					memory[point_memo & 0xFF] = memo_buffer;
 
 					loc = point_memo & 0xFF;
@@ -122,12 +119,10 @@ int main(int argc, char *argv[]){
 				acertostlb++;
 			}
 
-			//Pega pagina da memoria e o caractere
-			//memory.seekg(loc*MEMORY_SIZE+offset);
-			//memory.read(caractere, 1);
-			caractere[0] = memory[loc][offset];
+			//Pega caractere naquele offset na pagina da memoria
+			caractere = memory[loc][offset];
 
-			print_line(num, num_efetivo, pgnumber, offset, caractere[0]);
+			print_line(num, num_efetivo, pgnumber, offset, caractere);
 			numentradas++;
 		}
 
@@ -138,11 +133,14 @@ int main(int argc, char *argv[]){
 		//Fechar o arquivo
 		entrada.close();
 		backstore.close();
-		//memory.close();
-	}
-	else{
+
+	}else{
 		print_error();
 	}
+
+	delete [] memory;
+	delete [] tlb;
+	delete [] pagetable;
 
 	return 0;
 }
@@ -180,8 +178,7 @@ void print_header(void){
 void print_error(void){
 	cerr << "Erro na abertura de arquivo" << endl << endl;
 	cout << "Tente renomear o arquivo de entrada para 'enderecos.txt'\n"
-		 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n"
-		 << "Verifique se existe um 'memory.txt' no diretório\n" << endl;
+		 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n" << endl;
 }
 
 void print_line(int info1, int info2, int info3, int info4, char info5){
@@ -214,9 +211,9 @@ void print_pagetable(PageTable t[]){
 
 void print_estatisticas(int info1, int info2, int info3, int info4){
 	cout << "\n\nNumero de entradas: " << info1
-	     << "\nNumero de faltas de pagina: " << info2 << "\t"
-	     << "\nQuantidade de acertos na TLB: " << info3 << "\t"
-	     << "\nQuantidade de acertos na Tabela de Paginas: " << info4 << "\t" << endl;
+	     << "\nNumero de faltas de pagina: " << info2 << " (" << info2*100/info1 << "%)"
+	     << "\nQuantidade de acertos na TLB: " << info3 << " (" << info3*100/info1 << "%)"
+	     << "\nQuantidade de acertos na Tabela de Paginas: " << info4 << " (" << info4*100/info1 << "%)" << endl;
 }
 
 void clean_tlb(TLB t[]){
@@ -246,7 +243,7 @@ void set_tlb (TLB t[], int pg, int map) {
 	t[position].tlb_page_number = pg;
 
 	if(map == -1)
-		t[position].tlb_frame_number = point_memo & 0xF;
+		t[position].tlb_frame_number = point_memo & 0xFF;
 	else
 		t[position].tlb_frame_number = map;
 
