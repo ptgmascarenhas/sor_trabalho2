@@ -19,21 +19,21 @@ struct PageTable {
 	int pt_frame_number;
 };
 
-int my_stoi(string);				 	 //Transforma string para numero
-int calc_offset(int);   			 	 //Calcula o offset
-int calc_pgnumber(int); 			 	 //Calcula o numero de pagina
-void print_header(void);			 	 //Printa o titulo da tabela
+int my_stoi(string);				 	 					 //Transforma string para numero
+int calc_offset(int);   			 				 	 //Calcula o offset
+int calc_pgnumber(int); 			 	 				 //Calcula o numero de pagina
+void print_header(void);			 	 				 //Printa o titulo da tabela
 void print_line(int,int,int,int,char);	 //Printa as linhas da tabela
-void print_error(void);					 //Printa mensagem de erro	
+void print_error(void);					 				 //Printa mensagem de erro
 void print_estatisticas(int,int,int,int);//Printa as estatisticas
 
-void print_tlb(TLB t[]);			 	 //Printa a TLB
-void print_pagetable(PageTable t[]); 	 //Printa a tabela de paginas
-void clean_tlb(TLB t[]);			 	 //Limpa a TLB
-void clean_pagetable(PageTable t[]); 	 //Limpa a tabela de paginas
+void print_tlb(TLB t[]);			 	 				 //Printa a TLB
+void print_pagetable(PageTable t[]); 		 //Printa a tabela de paginas
+void clean_tlb(TLB t[]);			 	 				 //Limpa a TLB
+void clean_pagetable(PageTable t[]); 	 	 //Limpa a tabela de paginas
 
-int check_tlb(TLB t[], int);  			 //Procura por um elemento na TLB
-void set_tlb(TLB t[],int,int); 			 //Preenche um registro na TLB
+int check_tlb(TLB t[], int);  					 //Procura por um elemento na TLB
+void set_tlb(TLB t[],int,int); 			 		 //Preenche um registro na TLB
 
 int check_pagetable(PageTable t[], int); //Procura por um elemento
 void set_pagetable(PageTable t[],int);   //Preenche um registro na pt
@@ -84,11 +84,12 @@ int main(int argc, char *argv[]){
 
 			// Se a pagina nao estiver no TLB
 			if (tlb_hit == -1) {
-				map = check_pagetable(pagetable, pgnumber); //Checa se a pagina esta na tabela de paginas
+				//Checa se a pagina esta na tabela de paginas
+				map = check_pagetable(pagetable, pgnumber);
 
 				//Preenche TLB ou com a posicao da memoria atual (map = -1)
 				//Ou com o frame daquela page (map = frame)
-				set_tlb(tlb, pgnumber, map);     
+				set_tlb(tlb, pgnumber, map);
 
 				//Se a pagina nao estiver mapeada em memoria
 				if (map == -1) {
@@ -211,9 +212,12 @@ void print_pagetable(PageTable t[]){
 
 void print_estatisticas(int info1, int info2, int info3, int info4){
 	cout << "\n\nNumero de entradas: " << info1
-	     << "\nNumero de faltas de pagina: " << info2 << " (" << info2*100/info1 << "%)"
-	     << "\nQuantidade de acertos na TLB: " << info3 << " (" << info3*100/info1 << "%)"
-	     << "\nQuantidade de acertos na Tabela de Paginas: " << info4 << " (" << info4*100/info1 << "%)" << endl;
+	     << "\nNumero de faltas de pagina: " << info2
+			 << " (" << info2*100/info1 << "%)"
+	     << "\nQuantidade de acertos na TLB: " << info3
+			 << " (" << info3*100/info1 << "%)"
+	     << "\nQuantidade de acertos na Tabela de Paginas: "  << info4
+			 << " (" << info4*100/info1 << "%)" << endl;
 }
 
 void clean_tlb(TLB t[]){
@@ -232,7 +236,7 @@ void clean_pagetable(PageTable t[]){
 
 int check_tlb (TLB t[], int pg) {
 	for (int i = 0; i < TLB_SIZE; i++) {
-		if (t[i].tlb_page_number == pg) 
+		if (t[i].tlb_page_number == pg)
 			return t[i].tlb_frame_number;;
 	}
 	return -1;
