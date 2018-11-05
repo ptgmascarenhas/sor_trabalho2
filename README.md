@@ -13,10 +13,3 @@ g++ -o executavel main.cpp
 ./executavel arquivo_de_enderecos
 
 Caso nao seja declarado nenhum arquivo por padrao o programa procura por enderecos.txt
-
-
-*OBSERVACOES*
-
-- Arquivos final-* sao os que devem ser usados mesmo os outros foram criados p teste
-- Vamos continuar testando usando o abc... para ver como deixar tudo certinho antes
-- *MEMO_SIZE 3 deve ser trocado no final p 256*

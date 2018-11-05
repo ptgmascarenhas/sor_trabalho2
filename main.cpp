@@ -5,14 +5,13 @@
 
 #define TLB_SIZE 16
 #define PAGETABLE_SIZE 256
-#define MEMORY_SIZE 3
+#define MEMORY_SIZE 256
 
 using namespace std;
 
 struct TLB {
 	int tlb_page_number;
 	int tlb_frame_number;
-	//int tlb_time;
 };
 
 struct PageTable {
@@ -34,7 +33,7 @@ void clean_tlb(TLB t[]);			 	 //Limpa a TLB
 void clean_pagetable(PageTable t[]); 	 //Limpa a tabela de paginas
 
 int check_tlb(TLB t[], int);  			 //Procura por um elemento na TLB
-void set_tlb(TLB t[],int); 			 	 //Preenche um registro na TLB
+void set_tlb(TLB t[],int,int); 			 //Preenche um registro na TLB
 
 int check_pagetable(PageTable t[], int); //Procura por um elemento
 void set_pagetable(PageTable t[],int);   //Preenche um registro na pt
@@ -47,7 +46,9 @@ int main(int argc, char *argv[]){
 	char memo_buffer[MEMORY_SIZE], caractere[1];
 	int num, num_efetivo, offset, pgnumber, map, tlb_hit, loc;
 	int numentradas = 0, faltasdepagina = 0, acertostlb = 0, acertospt = 0;
-	fstream entrada, backstore, memory;
+	fstream entrada, backstore;// memory;
+
+	string *memory = new string[MEMORY_SIZE];
 
 	PageTable *pagetable = new PageTable[PAGETABLE_SIZE];
 	TLB *tlb = new TLB[TLB_SIZE];
@@ -63,10 +64,10 @@ int main(int argc, char *argv[]){
 		entrada.open("enderecos.txt");
 
 	backstore.open("BACKSTORE.bin");
-	memory.open("memory.txt");
+	//memory.open("memory.txt");
 
 	//Testar se o arquivo ta aberto
-	if (entrada.is_open() && backstore.is_open() && memory.is_open()){
+	if (entrada.is_open() && backstore.is_open() /*&& memory.is_open()*/){
 		cout << "Arquivos abertos com sucesso!\n" << endl;
 
 		print_header();
@@ -85,9 +86,11 @@ int main(int argc, char *argv[]){
 
 			// Se a pagina nao estiver no TLB
 			if (tlb_hit == -1) {
-				set_tlb(tlb, pgnumber);     //Preenche TLB com a pagina para proxima entrada
-
 				map = check_pagetable(pagetable, pgnumber); //Checa se a pagina esta na tabela de paginas
+
+				//Preenche TLB ou com a posicao da memoria atual (map = -1)
+				//Ou com o frame daquela page (map = frame)
+				set_tlb(tlb, pgnumber, map);     
 
 				//Se a pagina nao estiver mapeada em memoria
 				if (map == -1) {
@@ -96,7 +99,8 @@ int main(int argc, char *argv[]){
 					backstore.read(memo_buffer, MEMORY_SIZE);
 
 					//Coloca a pagina na memoria
-					memory << memo_buffer;
+					//memory << memo_buffer;
+					memory[point_memo & 0xFF] = memo_buffer;
 
 					loc = point_memo & 0xFF;
 
@@ -119,8 +123,9 @@ int main(int argc, char *argv[]){
 			}
 
 			//Pega pagina da memoria e o caractere
-			memory.seekg(loc*MEMORY_SIZE+offset);
-			memory.read(caractere, 1);
+			//memory.seekg(loc*MEMORY_SIZE+offset);
+			//memory.read(caractere, 1);
+			caractere[0] = memory[loc][offset];
 
 			print_line(num, num_efetivo, pgnumber, offset, caractere[0]);
 			numentradas++;
@@ -133,7 +138,7 @@ int main(int argc, char *argv[]){
 		//Fechar o arquivo
 		entrada.close();
 		backstore.close();
-		memory.close();
+		//memory.close();
 	}
 	else{
 		print_error();
@@ -236,11 +241,14 @@ int check_tlb (TLB t[], int pg) {
 	return -1;
 }
 
-void set_tlb (TLB t[], int pg) {
+void set_tlb (TLB t[], int pg, int map) {
 	int position = point_tlb & 0xF;
-
 	t[position].tlb_page_number = pg;
-	t[position].tlb_frame_number = point_memo & 0xFF;
+
+	if(map == -1)
+		t[position].tlb_frame_number = point_memo & 0xF;
+	else
+		t[position].tlb_frame_number = map;
 
 	point_tlb++;
 }
