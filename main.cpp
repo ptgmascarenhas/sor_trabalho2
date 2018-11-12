@@ -154,15 +154,11 @@ int my_stoi(string l){
 }
 
 int calc_offset(int n){
-	int offset;
-	offset = n & 0x00FF;
-	return offset;
+	return 	n & 0xFF;
 }
 
 int calc_pgnumber(int n){
-	int pgnumber;
-	pgnumber = (n & 0xFF00)>>8;
-	return pgnumber;
+	return  n>>8;
 }
 
 void print_header(void){
@@ -179,7 +175,7 @@ void print_header(void){
 void print_error(void){
 	cerr << "Erro na abertura de arquivo" << endl << endl;
 	cout << "Tente renomear o arquivo de entrada para 'enderecos.txt'\n"
-		 << "Verifique se existe um 'BACKSTORE.bin' no diretório\n" << endl;
+		   << "Verifique se existe um 'BACKSTORE.bin' no diretório\n" << endl;
 }
 
 void print_line(int info1, int info2, int info3, int info4, char info5){
@@ -187,27 +183,27 @@ void print_line(int info1, int info2, int info3, int info4, char info5){
 	     << info2 << "\t"
 	     << info3 << "\t"
 	     << info4 << "\t"
-		 << info5 << "\t" << endl;
+	  	 << info5 << "\t" << endl;
 }
 
 void print_tlb(TLB t[]){
 	cout << "\n\nTLB:" << endl
-		 << endl << "\tPN" << "\tFN\n" << endl;
+	  	 << endl << "\tPN" << "\tFN\n" << endl;
 
 	for(int i = 0; i < TLB_SIZE; i++)
 		cout << i << "\t"
-			 << t[i].tlb_page_number << "\t"
-		 	 << t[i].tlb_frame_number << endl;
+			   << t[i].tlb_page_number << "\t"
+		 	   << t[i].tlb_frame_number << endl;
 }
 
 void print_pagetable(PageTable t[]){
 	cout << "\n\nTabela de paginas: " << endl
-		 << endl << "\tFN" << "\tPB\n" << endl;
+	  	 << endl << "\tFN" << "\tPB\n" << endl;
 
 	for(int i = 0; i < PAGETABLE_SIZE; i++)
 		cout << i << "\t"
-			 << t[i].pt_frame_number << "\t"
-			 << t[i].pt_present_bit << endl;
+			   << t[i].pt_frame_number << "\t"
+		  	 << t[i].pt_present_bit << endl;
 }
 
 void print_estatisticas(int info1, int info2, int info3, int info4){
