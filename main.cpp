@@ -122,7 +122,6 @@ int main(int argc, char *argv[]){
 
 			//Pega caractere naquele offset na pagina da memoria
 			caractere = memory[loc][offset];
-
 			print_line(num, num_efetivo, pgnumber, offset, caractere);
 			numentradas++;
 		}
@@ -226,7 +225,7 @@ void clean_tlb(TLB t[]){
 void clean_pagetable(PageTable t[]){
 	for(int i = 0; i < PAGETABLE_SIZE; i++){
 		t[i].pt_frame_number = -1;
-		t[i].pt_present_bit = -1;
+		t[i].pt_present_bit = 0;
 	}
 }
 
