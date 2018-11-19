@@ -25,7 +25,7 @@ int calc_pgnumber(int); 			 	 				 //Calcula o numero de pagina
 void print_header(void);			 	 				 //Printa o titulo da tabela
 void print_line(int,int,int,int,char);	 //Printa as linhas da tabela
 void print_error(void);					 				 //Printa mensagem de erro
-void print_estatisticas(int,int,int,int);//Printa as estatisticas
+void print_estatisticas(double,int,int,int);//Printa as estatisticas
 
 void print_tlb(TLB t[]);			 	 				 //Printa a TLB
 void print_pagetable(PageTable t[]); 		 //Printa a tabela de paginas
@@ -207,7 +207,7 @@ void print_pagetable(PageTable t[]){
 		  	 << t[i].pt_present_bit << endl; //Bit de confirmacao de existencia do mapeamento
 }
 //Imprime as estatisticas finais obtidas
-void print_estatisticas(int info1, int info2, int info3, int info4){
+void print_estatisticas(double info1, int info2, int info3, int info4){
 	cout << "\n\nNumero de entradas: " << info1
 	     << "\nNumero de faltas de pagina: " << info2
 			 << " (" << info2*100/info1 << "%)"
@@ -265,7 +265,7 @@ int check_pagetable(PageTable t[], int pg){
 
 //Caso certa pagina nao esteja mapeada na tabela de paginas, ela eh mapeada
 void set_pagetable(PageTable t[], int pg){
-	t[pg].pt_frame_number = point_memo & 0xFF; 
+	t[pg].pt_frame_number = point_memo & 0xFF;
 	t[pg].pt_present_bit = 1;
 	point_memo++;
 }
