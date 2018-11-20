@@ -8,7 +8,8 @@ Antes de compilar:
 
 #### Para compilar e rodar use:
 
-> $ g++ -o executavel main.cpp \n
+> $ g++ -o executavel main.cpp
+
 > $ ./executavel arquivo_de_enderecos
 
 Caso nao seja declarado nenhum arquivo o programa procura por enderecos.txt
